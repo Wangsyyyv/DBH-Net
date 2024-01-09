@@ -16,7 +16,7 @@ from thop import profile
 
 logger = logging.getLogger(__name__)
 
-
+#构建一个残差网络模块_wsy
 class Residual(nn.Module):
     def __init__(self, inp_dim, out_dim):
         super(Residual, self).__init__()
@@ -77,7 +77,7 @@ class ChannelPool(nn.Module):
     def forward(self, x):
         return torch.cat((torch.max(x, 1)[0].unsqueeze(1), torch.mean(x, 1).unsqueeze(1)), dim=1)
 
-
+ #双线性融合（BiFusion）模块_wsy(未使用)
 class BiFusion_block(nn.Module):
     def __init__(self, ch_1, ch_2, r_2, ch_int, ch_out, drop_rate=0.):
         super(BiFusion_block, self).__init__()
@@ -130,7 +130,7 @@ class BiFusion_block(nn.Module):
         else:
             return fuse
 
-
+#BasicConv2d,RFB_modified是多尺度融合卷积，保持尺寸不变，融合各个维度Pytorch_wsy
 class RFB_modified(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(RFB_modified, self).__init__()
@@ -234,7 +234,7 @@ class CABM_Block(nn.Module):
         x = self.sa(x)
         return x
 
-
+#Transformer分支和卷积分支的特征融合模块FF_wsy(SUFusionBlock未使用，SUFusionBlock_2使用)
 class SUFusionBlock(nn.Module):
     def __init__(self, in_c, out_c, l_c=0):
         super(SUFusionBlock, self).__init__()
@@ -340,7 +340,7 @@ class Attention_block(nn.Module):
         psi = self.psi(psi)
         return x * psi
 
-
+#被用于上采样中的卷积_wsy
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -510,4 +510,9 @@ class STCUnet(nn.Module):
         else:
             print("none pretrain")
 
+if __name__ == '__main__':
+    img = torch.randn(4, 3, 224, 224)
 
+    model = STCUnet(config, img_size=224, num_classes=1, zero_head=False, drop_rate=0.2)
+    x_f_4, x_s_feat, x_u_feat = model(img)
+    print(x_f_4.shape)
