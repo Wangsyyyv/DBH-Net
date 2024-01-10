@@ -633,7 +633,7 @@ class aggregation(nn.Module):
         self.conv_concat2 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
         self.conv_concat3 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
         self.conv4 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
-        self.conv5 = nn.Conv2d(3 * channel, 2, 1)
+        self.conv5 = nn.Conv2d(3 * channel, 1, 1)
 
     def forward(self, x1, x2, x3):
         x1_1 = x1
@@ -841,7 +841,8 @@ class SwinTransformerSys(nn.Module):
         x_2_rfb = self.rfb2(x2)
         x_1_rfb = self.rfb1(x1)
         """Swin_Transformer特征解码_wsy"""
-        x_agg = self.agg1(x_3_rfb, x_2_rfb, x_1_rfb)         #Deep Feature Aggreagtion Dercoder_wsy
+        x_agg = self.agg1(x_3_rfb, x_2_rfb, x_1_rfb)   #Deep Feature Aggreagtion Dercoder_wsy
+        print("x_agg.shape", x_agg.shape)
         x_s_feat = F.interpolate(x_agg, scale_factor=8, mode='bilinear')
 
         return x3, x2, x1, x0, x_s_feat

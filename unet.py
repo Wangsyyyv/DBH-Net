@@ -136,7 +136,7 @@ class aggregation(nn.Module):
         self.conv_concat2 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
         self.conv_concat3 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
         self.conv4 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
-        self.conv5 = nn.Conv2d(3 * channel, 2, 1)
+        self.conv5 = nn.Conv2d(3 * channel, 1, 1)
 
     def forward(self, x1, x2, x3):
         x1_1 = x1

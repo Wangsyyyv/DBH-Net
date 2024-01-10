@@ -483,9 +483,9 @@ class STCUnet(nn.Module):
 
     def forward(self, x):
         x_s_4, x_s_3, x_s_2, x_s_1, x_s_feat = self.swin_unet(x)
-
+        print("x_s_feat",x_s_feat.shape)
         x_u_2, x_u_3, x_u_4, x_u_5, x_u_feat = self.Unet(x)
-
+        print("x_u_feat",x_u_feat.shape)
        #使用up_1234 (SUFusionBlock_2)进行特征融合_wsy
         x_c_1 = self.up_1(x_u_2, x_s_1)
         x_c_2 = self.up_2(x_u_3, x_s_2, x_c_1)
