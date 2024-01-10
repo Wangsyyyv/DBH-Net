@@ -840,8 +840,8 @@ class SwinTransformerSys(nn.Module):
         x_3_rfb = self.rfb3(x3)
         x_2_rfb = self.rfb2(x2)
         x_1_rfb = self.rfb1(x1)
-
-        x_agg = self.agg1(x_3_rfb, x_2_rfb, x_1_rfb)
+        """Swin_Transformer特征解码_wsy"""
+        x_agg = self.agg1(x_3_rfb, x_2_rfb, x_1_rfb)         #Deep Feature Aggreagtion Dercoder_wsy
         x_s_feat = F.interpolate(x_agg, scale_factor=8, mode='bilinear')
 
         return x3, x2, x1, x0, x_s_feat

@@ -394,28 +394,58 @@ class Up(nn.Module):
 
 
 class STCUnet(nn.Module):
-    def __init__(self, config, img_size=224, num_classes=1, zero_head=False, drop_rate=0.2):
+    # def __init__(self, config, img_size=224, num_classes=1, zero_head=False, drop_rate=0.2):
+    def __init__(self, img_size=224, num_classes=1, zero_head=False, drop_rate=0.2):
         super(STCUnet, self).__init__()
         self.num_classes = num_classes
         self.zero_head = zero_head
-        self.config = config
+        # self.config = config
 
-        self.swin_unet = SwinTransformerSys(img_size=config.DATA.IMG_SIZE,
-                                            patch_size=config.MODEL.SWIN.PATCH_SIZE,
-                                            in_chans=config.MODEL.SWIN.IN_CHANS,
+        patch_size = 4
+        in_chans = 3
+        embed_dim = 96
+        depths = [2, 2, 6, 2]
+        num_heads = [3, 6, 12, 24]
+        window_size = 7
+        mlp_ratio = 4.
+        qkv_bias = True
+        qk_scale = None
+        ape = False
+        patch_norm = True
+        drop_path_rate = 0.2
+        use_checkpoint = False
+        self.swin_unet = SwinTransformerSys(img_size=img_size,
+                                            patch_size=patch_size,
+                                            in_chans=in_chans,
                                             num_classes=self.num_classes,
-                                            embed_dim=config.MODEL.SWIN.EMBED_DIM,
-                                            depths=config.MODEL.SWIN.DEPTHS,
-                                            num_heads=config.MODEL.SWIN.NUM_HEADS,
-                                            window_size=config.MODEL.SWIN.WINDOW_SIZE,
-                                            mlp_ratio=config.MODEL.SWIN.MLP_RATIO,
-                                            qkv_bias=config.MODEL.SWIN.QKV_BIAS,
-                                            qk_scale=config.MODEL.SWIN.QK_SCALE,
-                                            drop_rate=config.MODEL.DROP_RATE,
-                                            drop_path_rate=config.MODEL.DROP_PATH_RATE,
-                                            ape=config.MODEL.SWIN.APE,
-                                            patch_norm=config.MODEL.SWIN.PATCH_NORM,
-                                            use_checkpoint=config.TRAIN.USE_CHECKPOINT)
+                                            embed_dim=embed_dim,
+                                            depths=depths,
+                                            num_heads=num_heads,
+                                            window_size=window_size,
+                                            mlp_ratio=mlp_ratio,
+                                            qkv_bias=qkv_bias,
+                                            qk_scale=qk_scale,
+                                            drop_rate=drop_rate,
+                                            drop_path_rate=drop_path_rate,
+                                            ape=ape,
+                                            patch_norm=patch_norm,
+                                            use_checkpoint=use_checkpoint)
+        # self.swin_unet = SwinTransformerSys(img_size=config.DATA.IMG_SIZE,
+        #                                     patch_size=config.MODEL.SWIN.PATCH_SIZE,
+        #                                     in_chans=config.MODEL.SWIN.IN_CHANS,
+        #                                     num_classes=self.num_classes,
+        #                                     embed_dim=config.MODEL.SWIN.EMBED_DIM,
+        #                                     depths=config.MODEL.SWIN.DEPTHS,
+        #                                     num_heads=config.MODEL.SWIN.NUM_HEADS,
+        #                                     window_size=config.MODEL.SWIN.WINDOW_SIZE,
+        #                                     mlp_ratio=config.MODEL.SWIN.MLP_RATIO,
+        #                                     qkv_bias=config.MODEL.SWIN.QKV_BIAS,
+        #                                     qk_scale=config.MODEL.SWIN.QK_SCALE,
+        #                                     drop_rate=config.MODEL.DROP_RATE,
+        #                                     drop_path_rate=config.MODEL.DROP_PATH_RATE,
+        #                                     ape=config.MODEL.SWIN.APE,
+        #                                     patch_norm=config.MODEL.SWIN.PATCH_NORM,
+        #                                     use_checkpoint=config.TRAIN.USE_CHECKPOINT)
         self.Unet = UNet(3, 1, bilinear=False)
 
         self.up_1 = SUFusionBlock_2(96, 96)
@@ -456,6 +486,7 @@ class STCUnet(nn.Module):
 
         x_u_2, x_u_3, x_u_4, x_u_5, x_u_feat = self.Unet(x)
 
+       #使用up_1234 (SUFusionBlock_2)进行特征融合_wsy
         x_c_1 = self.up_1(x_u_2, x_s_1)
         x_c_2 = self.up_2(x_u_3, x_s_2, x_c_1)
         x_c_3 = self.up_3(x_u_4, x_s_3, x_c_2)
@@ -464,11 +495,13 @@ class STCUnet(nn.Module):
         x_f_1 = self.cat_1(x_c_4, x_c_3)
         x_f_2 = self.cat_2(x_f_1, x_c_2)
         x_f_3 = self.cat_3(x_f_2, x_c_1)
-
+        print("x_f_3",x_f_3.shape)
         #x_f_4 = self.cat_4(x_f_3)
-        x_f_4 = self.final_2(x_f_3)
+    ###################################################融合特征开始解码##########################################################################
+        x_f_4 = self.final_2(x_f_3)    #Decoder
+        print("x_f_4",x_f_4.shape)
         x_f_4 = F.interpolate(x_f_4, scale_factor=4, mode='bilinear')
-
+        print("x_f_4_up",x_f_4.shape)
         return x_f_4, x_s_feat, x_u_feat
 
 
@@ -511,8 +544,8 @@ class STCUnet(nn.Module):
             print("none pretrain")
 
 if __name__ == '__main__':
-    img = torch.randn(4, 3, 224, 224)
+    img = torch.randn(2, 3, 224, 224)
 
-    model = STCUnet(config, img_size=224, num_classes=1, zero_head=False, drop_rate=0.2)
+    model = STCUnet(img_size=224, num_classes=1, zero_head=False, drop_rate=0.2)
     x_f_4, x_s_feat, x_u_feat = model(img)
     print(x_f_4.shape)

@@ -195,7 +195,7 @@ def validate(config, val_loader, model, criterion):
             input = input.to(device)
             target = target.to(device)
 
-            output, o1, o2 = model(input)
+            output, o1, o2 = model(input)   #x_f_4,x_s_feat,x_u_feat
 
             loss_1 = criterion(o1, target.squeeze(1).long())
             loss_2 = criterion(o2, target.squeeze(1).long())

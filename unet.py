@@ -245,7 +245,8 @@ class UNet(nn.Module):
         x3_rfb = self.rfb3(x3)
         x4_rfb = self.rfb4(x4)
         x5_rfb = self.rfb5(x5)
-        x_agg = self.agg1(x5_rfb, x4_rfb, x3_rfb)
+        """UNet特征解码_wsy"""
+        x_agg = self.agg1(x5_rfb, x4_rfb, x3_rfb)              #Deep Feature Aggreagtion Dercoder_wsy
         x_u_feat = F.interpolate(x_agg, scale_factor=8, mode='bilinear')
         # x = self.up1(x5, x4)
         # x = self.up2(x, x3)
